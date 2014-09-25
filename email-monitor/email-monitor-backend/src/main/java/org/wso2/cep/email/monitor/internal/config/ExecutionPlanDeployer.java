@@ -27,7 +27,7 @@ public class ExecutionPlanDeployer {
     }
 
 
-    public String createExecutionPlan(String queries[] , AxisConfiguration axisConfiguration) throws EmailMonitorServiceException {
+    public String createExecutionPlan(String[] queries , AxisConfiguration axisConfiguration) throws EmailMonitorServiceException {
         String executionPlanXmlConfiguration = this.getExecutionPlanConfiguration(queries);
         String executionPlanName = this.getExecutionPlanName();
         executionPlanXmlConfiguration = executionPlanXmlConfiguration.replace(EmailMonitorConstants.EXECUTION_PLAN_NAME,executionPlanName);

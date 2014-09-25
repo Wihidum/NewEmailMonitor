@@ -22,6 +22,7 @@ public class MessageFilter extends AbstractMediator {
 
 
     public boolean mediate(MessageContext messageContext){
+        long test = MailSessionInfoStore.getPreviouseBundleFirstMailTS();
         int messageCount = MediatorConstants.DEFAULT_VALUE_ZERO;
         MailSessionInfoStore.incrementBundleCount();
         SOAPBody soapBody = messageContext.getEnvelope().getBody();
@@ -38,30 +39,23 @@ public class MessageFilter extends AbstractMediator {
             if (MailSessionInfoStore.getBundleCount() == MediatorConstants.MESSAGE_COUNT_STARTING_VALUE && messageCount == MediatorConstants.MESSAGE_COUNT_STARTING_VALUE) {
                 MailSessionInfoStore.setPreviouseBundleFirstMailTS(timeS);
                 selectedMails.addChild(omelement);
-
             } else if (MailSessionInfoStore.getBundleCount() > MediatorConstants.MESSAGE_COUNT_STARTING_VALUE) {
-
                     if (timeS <= MailSessionInfoStore.getPreviouseBundleFirstMailTS()) {
                         MailSessionInfoStore.setPreviouseMessageTS(timeS);
                         MailSessionInfoStore.setReadMailRecived(true);
                     } else {
                         selectedMails.addChild(omelement);
                     }
-                    if ( MailSessionInfoStore.isReadMailRecived()){
-                        MailSessionInfoStore.setPreviouseBundleFirstMailTS(MailSessionInfoStore.getNextBundleFirstMailTs());
-                        MailSessionInfoStore.setReadMailRecived(false);
-                        break;
-                    }
-                if (messageCount == MediatorConstants.MESSAGE_COUNT_STARTING_VALUE){
-                    MailSessionInfoStore.setNextBundleFirstMailTs(timeS);
-                }
             } else {
-                MailSessionInfoStore.setPreviouseMessageTS(timeS);
-                selectedMails.addChild(omelement);
+                 selectedMails.addChild(omelement);
+            }
+
+            if(timeS> test){
+                test = timeS;
             }
         }
         mailfirst.detach();
-
+        MailSessionInfoStore.setPreviouseBundleFirstMailTS(test);
         Iterator iterator1 = selectedMails.getChildElements();
         while (iterator1.hasNext()) {
             OMElement omElement = (OMElement) iterator1.next();
