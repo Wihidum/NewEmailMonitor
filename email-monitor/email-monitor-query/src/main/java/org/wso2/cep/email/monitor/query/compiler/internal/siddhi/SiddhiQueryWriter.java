@@ -53,7 +53,7 @@ public class SiddhiQueryWriter {
             stringBuffer.append(" select  threadID,labels, email:getAll(to) as to ,email:getAll(sender) as senders,");
             if (!siddhiTemplate.isSendMailEnabled()) {
                 stringBuffer.append(" " + '"' + siddhiTemplate.getLabelName() + '"' + " ");
-                stringBuffer.append("as newLabel insert into ");
+                stringBuffer.append("as newLabel group by threadID insert into ");
                 stringBuffer.append(ConstantsUtils.FILTERED_EMAIL_DETAILS);
                 stringBuffer.append(";");
             }
@@ -102,7 +102,7 @@ public class SiddhiQueryWriter {
             stringBuffer.append(" select  threadID,labels, email:getAll(to) as to ,email:getAll(sender) as senders,");
             if (!siddhiTemplate.isSendMailEnabled()) {
                 stringBuffer.append(" " + '"' + siddhiTemplate.getLabelName() + '"' + " ");
-                stringBuffer.append("as newLabel insert into ");
+                stringBuffer.append("as newLabel group by threadID insert into ");
                 stringBuffer.append(ConstantsUtils.FILTERED_EMAIL_DETAILS);
                 stringBuffer.append(";");
             }
@@ -143,12 +143,21 @@ public class SiddhiQueryWriter {
         stringBuffer1.append("from " + ConstantsUtils.INPUTSTREAM);
 
         if (!siddhiTemplate.isSendMailEnabled()) {
-            if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
-                stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,");
+            if(siddhiTemplate.isLabelCount()) {
+                if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
+                    stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,30 days");
+                }else {
+                    stringBuffer1.append("#window.externalTime(sentDate,30 days");
+                }
             }else {
-                stringBuffer1.append("#window.externalTime(sentDate,");
+                if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
+                    stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,");
+                }else {
+                    stringBuffer1.append("#window.externalTime(sentDate,");
+                }
+                stringBuffer1.append(siddhiTemplate.getTimeExpr());
+
             }
-            stringBuffer1.append(siddhiTemplate.getTimeExpr());
             stringBuffer1.append(")");
             stringBuffer1.append(" select  threadID, labels,count(messageID) as emailCount, email:getAll(to) as to ,email:getAll(sender) as senders,");
             stringBuffer1.append(" " + '"' + siddhiTemplate.getLabelName() + '"' + " ");
@@ -222,7 +231,7 @@ public class SiddhiQueryWriter {
                 if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
                     stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,30 days");
                 }else {
-                    stringBuffer1.append("#window.externalTime(sentDate,");
+                    stringBuffer1.append("#window.externalTime(sentDate,30 days");
                 }
             }else {
                 if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
@@ -231,6 +240,7 @@ public class SiddhiQueryWriter {
                     stringBuffer1.append("#window.externalTime(sentDate,");
                 }
                 stringBuffer1.append(siddhiTemplate.getTimeExpr());
+
             }
             stringBuffer1.append(")");
             stringBuffer1.append(" select  threadID,labels, count(messageID) as emailCount, email:getAll(to) as to ,email:getAll(sender) as senders,");
@@ -306,12 +316,24 @@ public class SiddhiQueryWriter {
             stringBuffer1.append(")");
         }
         stringBuffer1.append("]");
-        if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
-            stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,");
-        }else {
-            stringBuffer1.append("#window.externalTime(sentDate,");
+
+        if(siddhiTemplate.isLabelCount()) {
+            if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
+                stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,30 days");
+            }else {
+                stringBuffer1.append("#window.externalTime(sentDate,30 days");
+            }
+        } else {
+
+            if(siddhiTemplate.getCmpAction().equals("<=") || siddhiTemplate.getCmpAction().equals("<")){
+                stringBuffer1.append("#window.custom:externalTimeBatch(sentDate,");
+            }else {
+                stringBuffer1.append("#window.externalTime(sentDate,");
+            }
+            stringBuffer1.append(siddhiTemplate.getTimeExpr());
+
+
         }
-        stringBuffer1.append(siddhiTemplate.getTimeExpr());
         stringBuffer1.append(")");
         stringBuffer1.append(" select  ");
         stringBuffer1.append(" email:getUniqueCount(threadID) as threadCount,");

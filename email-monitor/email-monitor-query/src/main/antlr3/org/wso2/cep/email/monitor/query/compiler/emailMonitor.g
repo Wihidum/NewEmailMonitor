@@ -168,7 +168,7 @@ stringVal:INT_VAL? ID ;
 
 intVal 	:	INT_VAL;
 
-ID  :  ('a'..'z'|'A'..'Z'|'_')  ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'@'|'.')* ;
+ID  :  ('a'..'z'|'A'..'Z'|'_'|'-')  ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|'@'|'.'|'-')* ;
 
 STRING_VAL
 	:'\'' ( ~('\u0000'..'\u001f' | '\\' | '\''| '\"' ) )* '\'' {setText(getText().substring(1, getText().length()-1));}
